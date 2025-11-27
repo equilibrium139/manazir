@@ -1,0 +1,60 @@
+{
+  "version": 5,
+  "configurePresets": [
+   {
+      "name": "wsl-debug",
+      "displayName": "WSL Debug (GCC)",
+      "description": "Debug build for WSL using GCC/G++.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wsl-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "wsl-release",
+      "displayName": "WSL Release (GCC)",
+      "description": "Release build for WSL using GCC/G++.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wsl-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS_OUTPUT": "../../compile_commands.json" 
+      }
+    },
+    {
+      "name": "wsl-release-debug",
+      "displayName": "WSL RelWithDebInfo (GCC)",
+      "description": "Release with Debug Info build for WSL using GCC/G++.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wsl-release-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "wsl-release-profile-gprof",
+      "displayName": "WSL ReleaseProfile Gprof (GCC)",
+      "description": "WSL Release build with Gprof profiling flags using GCC/G++.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wsl-release-profile-gprof",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_CXX_FLAGS": "-pg",
+        "CMAKE_EXE_LINKER_FLAGS": "-pg"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+build/
+build-*/
+*.swp
+.vscode/
+.cache/
+compile_commands.json
+.vs/
+*.diagsession
+Testing/
