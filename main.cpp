@@ -6,7 +6,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-using Color = glm::u8vec3;
+using Color = glm::vec3;
 
 struct Ray {
     glm::vec3 origin, direction;
@@ -17,21 +17,38 @@ struct Sphere {
     float radius;
 };
 
-bool RayIntersectsSphere(const Ray& ray, const Sphere& sphere) {
+glm::vec3 PointAt(const Ray& ray, float t) {
+    return ray.origin + ray.direction * t;
+}
+
+// returns <0 for no intersect, >=0 otherwise
+float RayIntersectsSphere(const Ray& ray, const Sphere& sphere) {
     const float a = glm::dot(ray.direction, ray.direction);
     const float b = 2 * glm::dot(ray.direction, ray.origin - sphere.center);
     const glm::vec3 rayToSphere = sphere.center - ray.origin;
     const float c = glm::dot(rayToSphere, rayToSphere) - sphere.radius * sphere.radius;
-    const float determinant = b*b - 4*a*c;
-    return determinant >= 0;
+    const float discriminant = b*b - 4*a*c;
+    if (discriminant < 0.0f) return -1.0f;
+    return (-b - std::sqrt(discriminant)) / (2.0f*a);
 }
 
 Color ComputeRayColor(const Ray& ray) {
-    static Sphere s = { .center = glm::vec3(0.0f, 0.0f, 3.0f), .radius = 1.0f };
-    if (RayIntersectsSphere(ray, s)) {
-        return Color(255, 255, 0);
+    static Sphere s = { .center = glm::vec3(0.0f, 0.0f, -1.0f), .radius = 0.5f };
+    float t = RayIntersectsSphere(ray, s);
+    if (t >= 0.0f) {
+        glm::vec3 sphereHitPoint = PointAt(ray, t);
+        glm::vec3 normal = glm::normalize(sphereHitPoint - s.center);
+        glm::vec3 color = normal * glm::vec3(0.5f) + glm::vec3(0.5f);
+        return color;
     }
-    else return Color(0, 255, 255);
+    else { 
+        constexpr glm::vec3 blue = { 0.5f, 0.7f, 1.0f };
+        constexpr glm::vec3 white = { 1.0f, 1.0f, 1.0f };
+        const glm::vec3 rayDirNormalized = glm::normalize(ray.direction);
+        const float yNormalized = rayDirNormalized.y * 0.5f + 0.5f;
+        const float t = yNormalized;
+        return white + (blue - white) * t;
+    }
 }
 
 int main() {
@@ -58,7 +75,7 @@ int main() {
         for (int col = 0; col < imWidth; col++) {
             viewportPoint.x += pixelWidth;
             Ray ray = { .origin = cameraPos, .direction = viewportPoint - cameraPos };
-            pixels[row*imWidth+col] = ComputeRayColor(ray);
+            pixels[row*imWidth+col] = ComputeRayColor(ray) * 255.999f;
         }
     }
     stbi_write_png("manazir.png", imWidth, imHeight, 3, pixels.data(), imWidth * 3);
