@@ -3,13 +3,26 @@
 #include "hittable.h"
 #include "ray.h"
 #include "stb_image_write.h"
+#include <random>
+#include <utility>
 
 using Color = glm::vec3;
+
+inline float RandomFloat() {
+    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    static std::mt19937 gen;
+    return dist(gen);
+}
+
+inline float RandomFloat(float min, float max) {
+    return RandomFloat() * (max - min) + min;
+}
 
 class Camera {
 public:
     float imAspect = 16.0f / 9.0f;
     int imWidth = 400;
+    int samplesPerPixel = 10;
     // returns <0 for no intersect, >=0 otherwise
     Color ComputeRayColor(const Ray& ray, const HittableList& world) {
         HitRecord record;
@@ -29,16 +42,22 @@ public:
 
     std::vector<glm::u8vec3> Render(const HittableList& world) {
         Initialize();
-        std::vector<glm::u8vec3> image(imWidth*imHeight, glm::vec3(0.0f));
+        std::vector<Color> pixels(imWidth*imHeight, glm::vec3(0.0f));
         for (int row = 0; row < imHeight; row++) {
-            glm::vec3 viewportPoint = topLeftPixel + ((float)row * pixelDeltaY);
             for (int col = 0; col < imWidth; col++) {
-                viewportPoint = topLeftPixel + ((float)row * pixelDeltaY) + ((float)col * pixelDeltaX);
-                Ray ray = { .origin = cameraPos, .direction = viewportPoint - cameraPos };
-                image[row*imWidth+col] = ComputeRayColor(ray, world) * 255.99f;
-                //image[row*imWidth+col] = glm::u8vec3(255, 255, 255);
-                //viewportPoint += pixelDeltaX;
+                glm::vec3 viewportPointCenter = topLeftPixel + ((float)row * pixelDeltaY) + ((float)col * pixelDeltaX);
+                for (int sample = 0; sample < samplesPerPixel; sample++) {
+                    float xOffsetFactor = RandomFloat(-0.5f, 0.5f);
+                    float yOffsetFactor = RandomFloat(-0.5f, 0.5f);
+                    glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor; 
+                    Ray ray = { .origin = cameraPos, .direction = samplePoint - cameraPos };
+                    pixels[row*imWidth+col] += ComputeRayColor(ray, world);
+                }
             }
+        }
+        std::vector<glm::u8vec3> image(imWidth*imHeight);
+        for (int i = 0; i < pixels.size(); i++) {
+            image[i] = (pixels[i] / (float)samplesPerPixel) * 255.99f;
         }
         stbi_write_png("manazir.png", imWidth, imHeight, 3, image.data(), imWidth * 3);
         return image;
