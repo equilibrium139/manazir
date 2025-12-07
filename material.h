@@ -38,3 +38,34 @@ public:
     Color albedo;
     float fuzz;
 };
+
+
+class Dielectric : public Material {
+public:
+    Dielectric(float refractiveIndex) : refractiveIndex(refractiveIndex) {}
+    virtual bool Scatter(const Ray& incident, const HitRecord& hitRec, Color& attenuation, Ray& scattered) const override {
+        attenuation = Color(1.0f);
+        scattered.origin = hitRec.point;
+        const glm::vec3 incidentDirNormalized = glm::normalize(incident.direction);
+        float cosTheta = std::fmin(dot(-incidentDirNormalized, hitRec.normal), 1.0f);
+        float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+        // The third argument of refract is the ratio of source index to destination index. So if the face is a front face,
+        // that means we're going from air (1.0) to the material (refractiveIndex), hence 1.0/refractiveIndex
+        float refractiveRatio = hitRec.frontFace ? 1.0f / refractiveIndex : refractiveIndex;
+        bool cannotRefract = sinTheta * refractiveRatio > 1.0f;
+        if (cannotRefract || Reflectance(cosTheta, refractiveRatio) > RandomFloat()) {
+            scattered.direction = glm::reflect(incidentDirNormalized, hitRec.normal);
+        }
+        else {
+            scattered.direction = glm::refract(incidentDirNormalized, hitRec.normal, refractiveRatio);
+        }
+        return true;
+    }
+    float refractiveIndex;
+private:
+    static float Reflectance(float cosine, float refractiveIndex) {
+        float r0 = (1-refractiveIndex) / (1+refractiveIndex);
+        r0 = r0 * r0;
+        return r0 + (1-r0)*std::pow((1 - cosine), 5);
+    }
+};
