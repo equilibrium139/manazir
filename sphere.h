@@ -1,13 +1,15 @@
 #pragma once
 
 #include "hittable.h"
+#include <memory>
 
 struct Sphere : public Hittable {
     glm::vec3 center;
     float radius;
+    std::shared_ptr<Material> material;
     
-    Sphere(const glm::vec3& center, float radius) 
-        :center(center), radius(radius) {};
+    Sphere(const glm::vec3& center, float radius, std::shared_ptr<Material> material) 
+        :center(center), radius(radius), material(std::move(material)) {};
 
     virtual bool Hit(const Ray& ray, float tMin, float tMax, HitRecord& rec) const override {
         const float a = glm::dot(ray.direction, ray.direction);
@@ -28,6 +30,7 @@ struct Sphere : public Hittable {
         rec.t = root;
         rec.point = ray.origin + rec.t * ray.direction;
         rec.normal = (rec.point - center) / radius;
+        rec.material = material;
 
         if (glm::dot(rec.normal, ray.direction) > 0.0f) {
             rec.normal = -rec.normal;

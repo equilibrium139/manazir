@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cmath>
 #include <glm/glm.hpp>
 #include <random>
+
+using Color = glm::vec3;
 
 inline float RandomFloat() {
     static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -38,4 +41,9 @@ inline glm::vec3 RandomOnHemisphere(const glm::vec3& normal) {
             return point;
         }
     }
+}
+
+inline bool NearZero(const glm::vec3& v) {
+    float e = 1e-8;
+    return std::fabs(v[0]) < e && std::fabs(v[1]) < e && std::fabs(v[2]) < e;
 }

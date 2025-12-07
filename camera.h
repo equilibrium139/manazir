@@ -1,12 +1,11 @@
 #pragma once
 
 #include "hittable.h"
+#include "material.h"
 #include "ray.h"
 #include "stb_image_write.h"
 #include <random>
 #include "utilities.h"
-
-using Color = glm::vec3;
 
 class Camera {
 public:
@@ -19,9 +18,12 @@ public:
         if (depth <= 0) return Color(0.0f);
         HitRecord record;
         if (Hit(world, ray, 0.001f, INFINITY, record)) {
-            glm::vec3 bounceDir = record.normal + RandomUnitVector();
-            Ray bounce = { .origin = record.point, .direction = bounceDir };
-            return 0.1f * ComputeRayColor(bounce, depth - 1, world) ;
+            Ray scattered;
+            Color attenuation;
+            if (record.material->Scatter(ray, record, attenuation, scattered)) {
+                return attenuation * ComputeRayColor(scattered, depth - 1, world) ;
+            }
+            else return Color(0.0f);
         }
         else { 
             constexpr glm::vec3 blue = { 0.5f, 0.7f, 1.0f };
