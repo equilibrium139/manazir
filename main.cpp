@@ -29,6 +29,7 @@ int main() {
     Add(world, std::make_shared<Sphere>(glm::vec3(1,0,-1.0f), 0.5f, right));
 
     Camera camera;
+    camera.cameraPos = glm::vec3(-2.5f, 2.5f, 2.5f);
 
     camera.Render(world);
     return 0;

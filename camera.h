@@ -1,9 +1,12 @@
 #pragma once
 
+#include "glm/geometric.hpp"
+#include "glm/trigonometric.hpp"
 #include "hittable.h"
 #include "material.h"
 #include "ray.h"
 #include "stb_image_write.h"
+#include <cmath>
 #include <random>
 #include "utilities.h"
 
@@ -13,6 +16,10 @@ public:
     int imWidth = 400;
     int samplesPerPixel = 100;
     int maxDepth = 50;
+    float vfov = 45.0f;
+    glm::vec3 cameraPos = {0.0f, 0.0f, 0.0f};
+    glm::vec3 lookAt = {0.0f, 0.0f, -1.0f};
+    glm::vec3 up = {0.0f, 1.0f, 0.0f};
     // returns <0 for no intersect, >=0 otherwise
     Color ComputeRayColor(const Ray& ray, int depth, const HittableList& world) {
         if (depth <= 0) return Color(0.0f);
@@ -63,24 +70,27 @@ public:
 
 private:
     int imHeight;
-    glm::vec3 cameraPos;
     glm::vec3 pixelDeltaX;
     glm::vec3 pixelDeltaY;
     glm::vec3 topLeftPixel;
     float pixelSamplesScale;
+    glm::vec3 u, v, w;
 
     void Initialize() {
         imHeight = imWidth / imAspect;
-        cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
         float focalDistance = 1.0f;
-        float viewportHeight = 2.0f;
+        const float h = std::tan(glm::radians(vfov/2.0f));
+        float viewportHeight = 2.0f * h * focalDistance;
         float viewportWidth = viewportHeight * ((float)imWidth / imHeight);
+        w = glm::normalize(cameraPos - lookAt);
+        u = glm::normalize(glm::cross(up, w));
+        v = glm::normalize(glm::cross(w, u));
         float pixelWidth = viewportWidth / imWidth;
         float pixelHeight = viewportHeight / imHeight;
-        pixelDeltaX = glm::vec3(pixelWidth, 0.0f, 0.0f);
-        pixelDeltaY = glm::vec3(0.0f, -pixelHeight, 0.0f);
-        glm::vec3 viewportCenter = cameraPos - glm::vec3(0.0f, 0.0f, focalDistance);
-        glm::vec3 viewportTopLeft = viewportCenter - glm::vec3(viewportWidth / 2.0f, -viewportHeight / 2.0f, 0.0f);
+        pixelDeltaX = pixelWidth * u;
+        pixelDeltaY = -pixelHeight * v;
+        glm::vec3 viewportCenter = cameraPos - focalDistance * w;
+        glm::vec3 viewportTopLeft = viewportCenter - (viewportWidth / 2.0f) * u + (viewportHeight / 2.0f) * v;
         topLeftPixel = viewportTopLeft + 0.5f * (pixelDeltaX + pixelDeltaY);
         pixelSamplesScale = 1.0f / samplesPerPixel;
     }
