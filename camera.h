@@ -13,12 +13,14 @@
 class Camera {
 public:
     float imAspect = 16.0f / 9.0f;
-    int imWidth = 400;
-    int samplesPerPixel = 100;
+    int imWidth = 1200;
+    int samplesPerPixel = 500;
     int maxDepth = 50;
-    float vfov = 45.0f;
-    glm::vec3 cameraPos = {0.0f, 0.0f, 0.0f};
-    glm::vec3 lookAt = {0.0f, 0.0f, -1.0f};
+    float vfov = 20.0f;
+    float defocusAngle = 0.6f;
+    float focalDistance = 10.0f;
+    glm::vec3 cameraPos = {13.0f, 2.0f, 3.0f};
+    glm::vec3 lookAt = {0.0f, 0.0f, 0.0f};
     glm::vec3 up = {0.0f, 1.0f, 0.0f};
     // returns <0 for no intersect, >=0 otherwise
     Color ComputeRayColor(const Ray& ray, int depth, const HittableList& world) {
@@ -51,8 +53,9 @@ public:
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     float xOffsetFactor = RandomFloat(-0.5f, 0.5f);
                     float yOffsetFactor = RandomFloat(-0.5f, 0.5f);
-                    glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor; 
-                    Ray ray = { .origin = cameraPos, .direction = samplePoint - cameraPos };
+                    glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor;
+                    glm::vec3 rayOrigin = defocusAngle <= 0.0f ? cameraPos : DefocusDiskSample();
+                    Ray ray = { .origin = rayOrigin, .direction = samplePoint - rayOrigin };
                     pixels[row*imWidth+col] += ComputeRayColor(ray, maxDepth, world);
                 }
             }
@@ -75,10 +78,11 @@ private:
     glm::vec3 topLeftPixel;
     float pixelSamplesScale;
     glm::vec3 u, v, w;
+    glm::vec3 defocusDiskRight;
+    glm::vec3 defocusDiskUp;
 
     void Initialize() {
         imHeight = imWidth / imAspect;
-        float focalDistance = 1.0f;
         const float h = std::tan(glm::radians(vfov/2.0f));
         float viewportHeight = 2.0f * h * focalDistance;
         float viewportWidth = viewportHeight * ((float)imWidth / imHeight);
@@ -93,5 +97,13 @@ private:
         glm::vec3 viewportTopLeft = viewportCenter - (viewportWidth / 2.0f) * u + (viewportHeight / 2.0f) * v;
         topLeftPixel = viewportTopLeft + 0.5f * (pixelDeltaX + pixelDeltaY);
         pixelSamplesScale = 1.0f / samplesPerPixel;
+        float defocusRadius = std::tan(glm::radians(defocusAngle / 2.0f)) * focalDistance;
+        defocusDiskRight = u * defocusRadius;
+        defocusDiskUp = v * defocusRadius;
+    }
+
+    glm::vec3 DefocusDiskSample() const {
+        glm::vec3 randomPoint = RandomOnUnitCircle();
+        return cameraPos + randomPoint.x * defocusDiskRight + randomPoint.y * defocusDiskUp;
     }
 };

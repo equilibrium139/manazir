@@ -43,6 +43,15 @@ inline glm::vec3 RandomOnHemisphere(const glm::vec3& normal) {
     }
 }
 
+inline glm::vec3 RandomOnUnitCircle() {
+    while (true) {
+        glm::vec3 point = glm::vec3(RandomFloat(-1.0f, 1.0f), RandomFloat(-1.0f, 1.0f), 0.0f);
+        if (glm::dot(point, point) <= 1.0f) {
+            return point;
+        }
+    }
+}
+
 inline bool NearZero(const glm::vec3& v) {
     float e = 1e-8;
     return std::fabs(v[0]) < e && std::fabs(v[1]) < e && std::fabs(v[2]) < e;
