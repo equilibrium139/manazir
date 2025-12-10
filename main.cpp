@@ -43,7 +43,7 @@ int main() {
                     // diffuse
                     auto albedo = RandomVec3() * RandomVec3();
                     sphereMaterial = std::make_shared<Lambertian>(albedo);
-                    Add(world, std::make_shared<Sphere>(center, 0.2f, sphereMaterial));
+                    Add(world, std::make_shared<Sphere>(center, center + glm::vec3(0.0f, RandomFloat(0.0f, 0.5f), 0.0f), 0.2f, sphereMaterial));
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = RandomVec3(0.5f, 1.0f);

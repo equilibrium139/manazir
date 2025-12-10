@@ -13,8 +13,8 @@
 class Camera {
 public:
     float imAspect = 16.0f / 9.0f;
-    int imWidth = 1200;
-    int samplesPerPixel = 500;
+    int imWidth = 400;
+    int samplesPerPixel = 100;
     int maxDepth = 50;
     float vfov = 20.0f;
     float defocusAngle = 0.6f;
@@ -55,7 +55,7 @@ public:
                     float yOffsetFactor = RandomFloat(-0.5f, 0.5f);
                     glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor;
                     glm::vec3 rayOrigin = defocusAngle <= 0.0f ? cameraPos : DefocusDiskSample();
-                    Ray ray = { .origin = rayOrigin, .direction = samplePoint - rayOrigin };
+                    Ray ray = { .origin = rayOrigin, .direction = samplePoint - rayOrigin, .time = RandomFloat() };
                     pixels[row*imWidth+col] += ComputeRayColor(ray, maxDepth, world);
                 }
             }

@@ -18,7 +18,7 @@ public:
         :albedo(albedo) {}
     virtual bool Scatter(const Ray& incident, const HitRecord& hitRec, Color& attenuation, Ray& scattered) const override {
         attenuation = albedo;
-        scattered = { .origin = hitRec.point, .direction = hitRec.normal + RandomUnitVector() };
+        scattered = { .origin = hitRec.point, .direction = hitRec.normal + RandomUnitVector(), .time=incident.time };
         if (NearZero(scattered.direction)) scattered.direction = hitRec.normal;
         return true;
     }
@@ -32,7 +32,7 @@ public:
     virtual bool Scatter(const Ray& incident, const HitRecord& hitRec, Color& attenuation, Ray& scattered) const override {
         attenuation = albedo;
         glm::vec3 reflected = glm::normalize(glm::reflect(incident.direction, hitRec.normal)) + RandomUnitVector() * fuzz;
-        scattered = { .origin = hitRec.point, .direction = reflected };
+        scattered = { .origin = hitRec.point, .direction = reflected, .time=incident.time };
         return glm::dot(scattered.direction, hitRec.normal) > 0.0f;
     }
     Color albedo;
@@ -46,6 +46,7 @@ public:
     virtual bool Scatter(const Ray& incident, const HitRecord& hitRec, Color& attenuation, Ray& scattered) const override {
         attenuation = Color(1.0f);
         scattered.origin = hitRec.point;
+        scattered.time = incident.time;
         const glm::vec3 incidentDirNormalized = glm::normalize(incident.direction);
         float cosTheta = std::fmin(dot(-incidentDirNormalized, hitRec.normal), 1.0f);
         float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);

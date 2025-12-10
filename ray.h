@@ -4,7 +4,8 @@
 
 struct Ray {
     glm::vec3 origin, direction;
-    glm::vec3 PointAt(float t) {
+    float time;
+    glm::vec3 PointAt(float t) const {
         return origin + direction * t;
     }
 };
