@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glm/common.hpp"
 #include "hittable.h"
 #include <memory>
 
@@ -43,5 +44,16 @@ struct Sphere : public Hittable {
         else rec.frontFace = true;
 
         return true;
+    }
+
+    AABB GetAABB() const override {
+        // For moving objects, the AABB will be large enough to enclose the object throughout its motion
+        glm::vec3 sphereStartPos = movement.origin;
+        glm::vec3 sphereEndPos = movement.PointAt(1.0f);
+        const glm::vec3 radiusVec = glm::vec3(radius);
+        return {
+            .minCorner = glm::min(sphereStartPos - radiusVec, sphereEndPos - radiusVec),
+            .maxCorner = glm::max(sphereStartPos + radiusVec, sphereEndPos + radiusVec)
+        };
     }
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "aabb.h"
 #include "ray.h"
 #include <cfloat>
 #include <cmath>
@@ -19,7 +20,12 @@ struct HitRecord {
 class Hittable {
 public:
     virtual bool Hit(const Ray& ray, float tMin, float tMax, HitRecord& rec) const = 0;
+    virtual AABB GetAABB() const = 0;
     virtual ~Hittable() = default;
+    glm::vec3 AABBCenter() const {
+        AABB aabb = GetAABB();
+        return (aabb.minCorner + aabb.maxCorner) * 0.5f;
+    }
 };
 
 using HittableList = std::vector<std::shared_ptr<Hittable>>;
@@ -39,3 +45,13 @@ inline bool Hit(const HittableList& list, const Ray& ray, float near, float far,
     }
     return hitSomething;
 }
+
+inline AABB HittableListAABB(const HittableList& world) {
+    AABB aabb = { .minCorner = glm::vec3(std::numeric_limits<float>::infinity()), .maxCorner = glm::vec3(-std::numeric_limits<float>::infinity()) };
+    for (const auto& hittable : world) {
+        const AABB hittableAABB = hittable->GetAABB();
+        aabb.minCorner = glm::min(hittableAABB.minCorner, aabb.minCorner);
+        aabb.maxCorner = glm::max(hittableAABB.maxCorner, aabb.maxCorner);
+    }
+    return aabb;
+};

@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <limits>
 
-#include "hittable.h"
+#include "ray.h"
 
 struct AABB {
     glm::vec3 minCorner, maxCorner;
@@ -51,3 +52,5 @@ struct AABB {
         return inTRange;
     }
 };
+
+
