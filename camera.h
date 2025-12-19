@@ -8,6 +8,8 @@
 #include "stb_image_write.h"
 #include <cmath>
 #include <random>
+
+#include "bvh.h"
 #include "utilities.h"
 
 class Camera {
@@ -23,14 +25,14 @@ public:
     glm::vec3 lookAt = {0.0f, 0.0f, 0.0f};
     glm::vec3 up = {0.0f, 1.0f, 0.0f};
     // returns <0 for no intersect, >=0 otherwise
-    Color ComputeRayColor(const Ray& ray, int depth, const HittableList& world) {
+    Color ComputeRayColor(const Ray& ray, const BVH& bvh, int depth, const HittableList& world) {
         if (depth <= 0) return Color(0.0f);
         HitRecord record;
-        if (Hit(world, ray, 0.001f, INFINITY, record)) {
+        if (bvh.Hit(ray, 0.001f, INFINITY, record)) {
             Ray scattered;
             Color attenuation;
             if (record.material->Scatter(ray, record, attenuation, scattered)) {
-                return attenuation * ComputeRayColor(scattered, depth - 1, world) ;
+                return attenuation * ComputeRayColor(scattered, bvh, depth - 1, world);
             }
             else return Color(0.0f);
         }
@@ -46,6 +48,7 @@ public:
 
     std::vector<glm::u8vec3> Render(const HittableList& world) {
         Initialize();
+        BVH bvh = BVH(world);
         std::vector<Color> pixels(imWidth*imHeight, glm::vec3(0.0f));
         for (int row = 0; row < imHeight; row++) {
             for (int col = 0; col < imWidth; col++) {
@@ -56,7 +59,7 @@ public:
                     glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor;
                     glm::vec3 rayOrigin = defocusAngle <= 0.0f ? cameraPos : DefocusDiskSample();
                     Ray ray = { .origin = rayOrigin, .direction = samplePoint - rayOrigin, .time = RandomFloat() };
-                    pixels[row*imWidth+col] += ComputeRayColor(ray, maxDepth, world);
+                    pixels[row*imWidth+col] += ComputeRayColor(ray, bvh, maxDepth, world);
                 }
             }
         }

@@ -5,6 +5,7 @@
 #include <cfloat>
 #include <cmath>
 #include <memory>
+#include <span>
 #include <vector>
 
 class Material;
@@ -29,6 +30,7 @@ public:
 };
 
 using HittableList = std::vector<std::shared_ptr<Hittable>>;
+using HittableSpan = std::span<std::shared_ptr<Hittable>>;
 
 inline void Add(HittableList& list, std::shared_ptr<Hittable> hittable) {
     list.push_back(std::move(hittable));
@@ -46,7 +48,7 @@ inline bool Hit(const HittableList& list, const Ray& ray, float near, float far,
     return hitSomething;
 }
 
-inline AABB HittableListAABB(const HittableList& world) {
+inline AABB HittableSpanAABB(HittableSpan world) {
     AABB aabb = { .minCorner = glm::vec3(std::numeric_limits<float>::infinity()), .maxCorner = glm::vec3(-std::numeric_limits<float>::infinity()) };
     for (const auto& hittable : world) {
         const AABB hittableAABB = hittable->GetAABB();

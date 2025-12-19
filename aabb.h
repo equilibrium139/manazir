@@ -1,6 +1,5 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <limits>
 
 #include "ray.h"
 
@@ -51,6 +50,12 @@ struct AABB {
         const bool inTRange = t0Overlap > tMin ? (t0Overlap < tMax) : (tMin < t1Overlap);
         return inTRange;
     }
+
+    int LongestAxis() const {
+        glm::vec3 dims = maxCorner - minCorner;
+        if (dims.x > dims.y) {
+            return dims.x > dims.z ? 0 : 2;
+        }
+        else return dims.y > dims.z ? 1 : 2;
+    }
 };
-
-

@@ -7,21 +7,44 @@
 
 class BVH : public Hittable {
 public:
-    BVH(HittableList world) {
-        aabb = HittableListAABB(world);
+    explicit BVH(HittableList world) : BVH((HittableSpan)world) {}
 
-        int randomAxis = RandomInt(0, 2);
-        SortByAxis(world, randomAxis);
+    explicit BVH(HittableSpan span) {
+       aabb = HittableSpanAABB(span);
+       int countObjects = span.size();
+       if (countObjects == 2) {
+            left = span[0];
+            right = span[1];
+            return;
+        }
+        if (countObjects == 1) {
+            // this way we don't need to check for nullptr when calling hit on right or left. they're never nullptr
+            left = right = span[0];
+            return;
+        }
+        int longestAxis = aabb.LongestAxis();
+        SortByAxis(span, longestAxis);
+        int firstHalfEnd = countObjects / 2;
+        HittableSpan firstHalf {span.begin(), span.begin() + firstHalfEnd};
+        HittableSpan secondHalf {span.begin() + firstHalfEnd, span.end()};
+        left = std::make_shared<BVH>(firstHalf);
+        right = std::make_shared<BVH>(secondHalf);
     }
 
     bool Hit(const Ray& ray, float tMin, float tMax, HitRecord& rec) const override {
         if (!aabb.Hit(ray, tMin, tMax)) return false;
 
-        return left->Hit(ray, tMin, tMax, rec) || right->Hit(ray, tMin, tMax, rec);
+        bool hitLeft = left->Hit(ray, tMin, tMax, rec);
+        bool hitRight = right->Hit(ray, tMin, hitLeft ? rec.t : tMax, rec);
+        return hitLeft || hitRight;
+    }
+
+    AABB GetAABB() const override {
+        return aabb;
     }
 
 private:
-    void SortByAxis(HittableList& world, int axis) {
+    static void SortByAxis(HittableSpan world, int axis) {
         if (axis == 0) {
             std::sort(world.begin(), world.end(), [](const auto& a, const auto& b) { return a->AABBCenter().x < b->AABBCenter().x; });
         }
