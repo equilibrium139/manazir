@@ -28,7 +28,8 @@ int main() {
     // Add(world, std::make_shared<Sphere>(glm::vec3(-1,0,-1), 0.4f, bubble));
     // Add(world, std::make_shared<Sphere>(glm::vec3(1,0,-1.0f), 0.5f, right));
 
-    auto groundMaterial = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
+    // auto groundMaterial = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
+    auto groundMaterial = std::make_shared<Lambertian>(std::make_shared<CheckerTexture>(Color(1.0f), Color(0.0f)));
     Add(world, std::make_shared<Sphere>(glm::vec3(0,-1000,0), 1000, groundMaterial));
 
     for (int a = -11; a < 11; a++) {
