@@ -15,6 +15,7 @@ struct HitRecord {
     glm::vec3 normal;
     std::shared_ptr<Material> material;
     float t;
+    glm::vec2 uv;
     bool frontFace;
 };
 

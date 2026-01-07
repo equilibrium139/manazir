@@ -21,7 +21,7 @@ public:
     float vfov = 20.0f;
     float defocusAngle = 0.6f;
     float focalDistance = 10.0f;
-    glm::vec3 cameraPos = {13.0f, 2.0f, 3.0f};
+    glm::vec3 pos = {13.0f, 2.0f, 3.0f};
     glm::vec3 lookAt = {0.0f, 0.0f, 0.0f};
     glm::vec3 up = {0.0f, 1.0f, 0.0f};
     // returns <0 for no intersect, >=0 otherwise
@@ -57,7 +57,7 @@ public:
                     float xOffsetFactor = RandomFloat(-0.5f, 0.5f);
                     float yOffsetFactor = RandomFloat(-0.5f, 0.5f);
                     glm::vec3 samplePoint = viewportPointCenter + pixelDeltaX * xOffsetFactor + pixelDeltaY * yOffsetFactor;
-                    glm::vec3 rayOrigin = defocusAngle <= 0.0f ? cameraPos : DefocusDiskSample();
+                    glm::vec3 rayOrigin = defocusAngle <= 0.0f ? pos : DefocusDiskSample();
                     Ray ray = { .origin = rayOrigin, .direction = samplePoint - rayOrigin, .time = RandomFloat() };
                     pixels[row*imWidth+col] += ComputeRayColor(ray, bvh, maxDepth, world);
                 }
@@ -89,14 +89,14 @@ private:
         const float h = std::tan(glm::radians(vfov/2.0f));
         float viewportHeight = 2.0f * h * focalDistance;
         float viewportWidth = viewportHeight * ((float)imWidth / imHeight);
-        w = glm::normalize(cameraPos - lookAt);
+        w = glm::normalize(pos - lookAt);
         u = glm::normalize(glm::cross(up, w));
         v = glm::normalize(glm::cross(w, u));
         float pixelWidth = viewportWidth / imWidth;
         float pixelHeight = viewportHeight / imHeight;
         pixelDeltaX = pixelWidth * u;
         pixelDeltaY = -pixelHeight * v;
-        glm::vec3 viewportCenter = cameraPos - focalDistance * w;
+        glm::vec3 viewportCenter = pos - focalDistance * w;
         glm::vec3 viewportTopLeft = viewportCenter - (viewportWidth / 2.0f) * u + (viewportHeight / 2.0f) * v;
         topLeftPixel = viewportTopLeft + 0.5f * (pixelDeltaX + pixelDeltaY);
         pixelSamplesScale = 1.0f / samplesPerPixel;
@@ -107,6 +107,6 @@ private:
 
     glm::vec3 DefocusDiskSample() const {
         glm::vec3 randomPoint = RandomOnUnitCircle();
-        return cameraPos + randomPoint.x * defocusDiskRight + randomPoint.y * defocusDiskUp;
+        return pos + randomPoint.x * defocusDiskRight + randomPoint.y * defocusDiskUp;
     }
 };

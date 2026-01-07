@@ -5,6 +5,7 @@
 #include <random>
 
 using Color = glm::vec3;
+using u8Color = glm::u8vec3;
 
 inline int RandomInt(int min, int max) {
     static std::random_device rd;

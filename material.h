@@ -21,7 +21,7 @@ public:
     Lambertian(std::shared_ptr<Texture> tex) 
         : albedo(tex) {}
     virtual bool Scatter(const Ray& incident, const HitRecord& hitRec, Color& attenuation, Ray& scattered) const override {
-        attenuation = albedo->Value(0.0f, 0.0f, hitRec.point);
+        attenuation = albedo->Value(hitRec.uv.x, hitRec.uv.y, hitRec.point);
         scattered = { .origin = hitRec.point, .direction = hitRec.normal + RandomUnitVector(), .time=incident.time };
         if (NearZero(scattered.direction)) scattered.direction = hitRec.normal;
         return true;

@@ -2,13 +2,15 @@
 
 #include "glm/common.hpp"
 #include "hittable.h"
+#include <cmath>
 #include <memory>
+#include <numbers>
 
 struct Sphere : public Hittable {
     Ray movement; // Sphere starts at origin and moves in direction defined by ray
     float radius;
     std::shared_ptr<Material> material;
-    
+
     Sphere(const glm::vec3& center, float radius, std::shared_ptr<Material> material) 
         :movement{.origin = center, .direction = {0.0f, 0.0f, 0.0f}}, radius(radius), material(std::move(material)) {};
 
@@ -36,6 +38,7 @@ struct Sphere : public Hittable {
         rec.point = ray.origin + rec.t * ray.direction;
         rec.normal = (rec.point - sphereCurrentPos) / radius;
         rec.material = material;
+        rec.uv = GetUV(rec.normal);
 
         if (glm::dot(rec.normal, ray.direction) > 0.0f) {
             rec.normal = -rec.normal;
@@ -55,5 +58,11 @@ struct Sphere : public Hittable {
             .minCorner = glm::min(sphereStartPos - radiusVec, sphereEndPos - radiusVec),
             .maxCorner = glm::max(sphereStartPos + radiusVec, sphereEndPos + radiusVec)
         };
+    }
+
+    static glm::vec2 GetUV(const glm::vec3& point) {
+        float u = (std::atan2(-point.z, point.x) + std::numbers::pi) / (2 * std::numbers::pi);
+        float v = std::acos(-point.y) / std::numbers::pi;
+        return { u , v };
     }
 };
