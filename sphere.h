@@ -38,13 +38,14 @@ struct Sphere : public Hittable {
         rec.point = ray.origin + rec.t * ray.direction;
         rec.normal = (rec.point - sphereCurrentPos) / radius;
         rec.material = material;
-        rec.uv = GetUV(rec.normal);
 
         if (glm::dot(rec.normal, ray.direction) > 0.0f) {
             rec.normal = -rec.normal;
             rec.frontFace = false;
         }
         else rec.frontFace = true;
+
+        rec.uv = GetUV(rec.normal);
 
         return true;
     }

@@ -45,12 +45,10 @@ public:
         : image(imgFile) {}
     Color Value(float u, float v, const glm::vec3 &point) const override {
         u = std::clamp(u, 0.0f, 1.0f);
-        v = std::clamp(v, 0.0f, 1.0f);
+        v = 1.0f - std::clamp(v, 0.0f, 1.0f);
         int x = int(u * (image.width - 1));
         int y = int(v * (image.height - 1));
-        auto pixel = image.PixelAt(x, y);
-        constexpr float colorScale = 1.0f / 255.0f;
-        return pixel * colorScale;
+        return image.PixelAt(x, y);
     }
 private:
     Image image;

@@ -71,11 +71,17 @@ void ManySpheresScene() {
 void TextureMappedSphere() {
     HittableList world;
     auto earthMaterial = std::make_shared<Lambertian>(std::make_shared<ImageTexture>("earthmap.jpg"));
-    Add(world, std::make_shared<Sphere>(glm::vec3(0,0,-5.0f), 1.0f, earthMaterial));
+    Add(world, std::make_shared<Sphere>(glm::vec3(0.0f, 0.0f, 0.0f), 2.0f, earthMaterial));
 
     Camera camera;
-    camera.pos = { 0.0f, 0.0f, 0.0f };
-    camera.lookAt = { 0.0f, 0.0f, -1.0f };
+    camera.imAspect = 16.0f / 9.0f;
+    camera.imWidth = 400;
+    camera.samplesPerPixel = 100;
+    camera.maxDepth = 50;
+    camera.vfov = 20;
+    camera.lookAt = glm::vec3(0.0f);
+    camera.pos = { 0.0f, 0.0f, 12.0f };
+    camera.defocusAngle = 0;
     camera.Render(world);
 }
 
