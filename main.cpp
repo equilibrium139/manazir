@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include "camera.h"
@@ -85,7 +86,26 @@ void TextureMappedSphere() {
     camera.Render(world);
 }
 
-int world = 1;
+void PerlinSpheres() {
+    HittableList world;
+    auto perlinTexture = std::make_shared<NoiseTexture>();
+    Add(world, std::make_shared<Sphere>(glm::vec3(0.0f, -1000.0f, 0.0f), 1000.0f, std::make_shared<Lambertian>(perlinTexture)));
+    Add(world, std::make_shared<Sphere>(glm::vec3(0.0f, 2.0f, 0.0f), 2.0f, std::make_shared<Lambertian>(perlinTexture)));
+
+    Camera camera;
+    camera.imAspect = 16.0f / 9.0f;
+    camera.imWidth = 400;
+    camera.samplesPerPixel = 100;
+    camera.maxDepth = 50;
+    camera.vfov = 20;
+    camera.lookAt = glm::vec3(0.0f);
+    camera.pos = { 13.0f, 2.0f, 3.0f };
+    camera.defocusAngle = 0;
+    camera.Render(world);
+
+}
+
+int world = 2;
 
 int main() {
     // auto ground = std::make_shared<Lambertian>(Color(0.8f, 0.8f, 0.0f));
@@ -105,6 +125,9 @@ int main() {
     }
     else if (world == 1) {
         TextureMappedSphere();
+    }
+    else if (world == 2) {
+        PerlinSpheres();
     }
     return 0;
 }

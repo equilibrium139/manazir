@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <glm/vec3.hpp>
 #include "image.h"
+#include "perlin.h"
 #include "utilities.h"
 #include <memory>
 
@@ -52,4 +53,15 @@ public:
     }
 private:
     Image image;
+};
+
+class NoiseTexture : public Texture {
+public:
+    NoiseTexture() {}
+    Color Value(float u, float v, const glm::vec3 &point) const override {
+        return Color(1.0f) * noise.Noise(point);
+    }
+
+private:
+    Perlin noise;
 };
