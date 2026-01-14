@@ -88,7 +88,7 @@ void TextureMappedSphere() {
 
 void PerlinSpheres() {
     HittableList world;
-    auto perlinTexture = std::make_shared<NoiseTexture>();
+    auto perlinTexture = std::make_shared<NoiseTexture>(4.0f);
     Add(world, std::make_shared<Sphere>(glm::vec3(0.0f, -1000.0f, 0.0f), 1000.0f, std::make_shared<Lambertian>(perlinTexture)));
     Add(world, std::make_shared<Sphere>(glm::vec3(0.0f, 2.0f, 0.0f), 2.0f, std::make_shared<Lambertian>(perlinTexture)));
 

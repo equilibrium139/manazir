@@ -7,7 +7,7 @@ class Perlin {
 public:
     Perlin() {
         for (int i = 0; i < pointCount; i++) {
-            randFloats[i] = RandomFloat();
+            randVecs[i] = RandomVec3(-1.0f, 1.0f);
         }
 
         GeneratePerm(permX);
@@ -24,11 +24,11 @@ public:
         int j = int(std::floor(p.y));
         int k = int(std::floor(p.z));
 
-        float c[2][2][2];
+        glm::vec3 c[2][2][2];
         for (int di = 0; di < 2; di++) {
             for (int dj = 0; dj < 2; dj++) {
                 for (int dk = 0; dk < 2; dk++) {
-                    c[di][dj][dk] = randFloats[
+                    c[di][dj][dk] = randVecs[
                         permX[(i+di) & 255] ^
                         permY[(j+dj) & 255] ^
                         permZ[(k+dk) & 255]
@@ -37,11 +37,25 @@ public:
             }
         }
 
-        return TrilinearInterp(c, u, v, w);
+        return PerlinInterp(c, u, v, w);
+    }
+
+    float Turbulence(const glm::vec3& point, int depth) const {
+        float accum = 0.0f;
+        glm::vec3 tempPoint = point;
+        float weight = 1.0f;
+        
+        for (int i = 0; i < depth; i++) {
+            accum += weight * Noise(tempPoint);
+            weight *= 0.5f;
+            tempPoint *= 2;
+        }
+
+        return std::fabs(accum);
     }
 private:
     static const int pointCount = 256;
-    float randFloats[pointCount];
+    glm::vec3 randVecs[pointCount];
     int permX[pointCount];
     int permY[pointCount];
     int permZ[pointCount];
@@ -53,15 +67,19 @@ private:
         std::random_shuffle(p, p + pointCount);
     }
 
-    static float TrilinearInterp(float c[2][2][2], float u, float v, float w) {
+    static float PerlinInterp(glm::vec3 c[2][2][2], float u, float v, float w) {
+        float uu = u*u*(3-2*u);
+        float vv = v*v*(3-2*v);
+        float ww = w*w*(3-2*w);
         float accum = 0.0f;
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 for (int k = 0; k < 2; k++) {
-                    accum += (i*u + (1-i)*(1-u))
-                            *(j*v + (1-j)*(1-v))
-                            *(k*w + (1-k)*(1-w))
-                            *c[i][j][k];
+                    glm::vec3 weight(u-i, v-j, w-k);
+                    accum += (i*uu + (1-i)*(1-uu))
+                            *(j*vv + (1-j)*(1-vv))
+                            *(k*ww + (1-k)*(1-ww))
+                            *glm::dot(c[i][j][k], weight);
                 }
             }
         }

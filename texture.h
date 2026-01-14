@@ -57,11 +57,12 @@ private:
 
 class NoiseTexture : public Texture {
 public:
-    NoiseTexture() {}
+    NoiseTexture(float scale) : scale(scale) {}
     Color Value(float u, float v, const glm::vec3 &point) const override {
-        return Color(1.0f) * noise.Noise(point);
+        return Color(0.5f) * (1 + std::sin(scale * point.z + 10 * noise.Turbulence(point, 7)));
     }
 
 private:
     Perlin noise;
+    float scale;
 };
