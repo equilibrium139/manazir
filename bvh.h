@@ -9,8 +9,8 @@ class BVH : public Hittable {
 public:
     explicit BVH(HittableList world) : BVH((HittableSpan)world) {}
 
-    explicit BVH(HittableSpan span) {
-       aabb = HittableSpanAABB(span);
+    explicit BVH(HittableSpan span)
+        :aabb(HittableSpanAABB(span)) {
        int countObjects = span.size();
        if (countObjects == 2) {
             left = span[0];

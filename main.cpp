@@ -14,6 +14,7 @@
 #include "stb_image_write.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#include "quad.h"
 #include "stb_image.h"
 
 glm::vec3 PointAt(const Ray& ray, float t) {
@@ -102,10 +103,35 @@ void PerlinSpheres() {
     camera.pos = { 13.0f, 2.0f, 3.0f };
     camera.defocusAngle = 0;
     camera.Render(world);
-
 }
 
-int world = 2;
+void Quads() {
+    HittableList world;
+    auto leftRed = std::make_shared<Lambertian>(Color(1.0, 0.2, 0.2));
+    auto backGreen = std::make_shared<Lambertian>(Color(0.2, 1.0, 0.2));
+    auto rightBlue = std::make_shared<Lambertian>(Color(0.2, 0.2, 1.0));
+    auto upperOrange = std::make_shared<Lambertian>(Color(1.0, 0.5, 0.0));
+    auto lowerTeal = std::make_shared<Lambertian>(Color(0.2, 0.8, 0.8));
+
+    Add(world, std::make_shared<Quad>(glm::vec3(-3.f,-2.f,5.f), glm::vec3(0.f,0.f,-4.f), glm::vec3(0.f,4.f,0.f), leftRed));
+    Add(world, std::make_shared<Quad>(glm::vec3(-2.f,-2.f,0.f), glm::vec3(4.f,0.f,0.f), glm::vec3(0.f,4.f,0.f), backGreen));
+    Add(world, std::make_shared<Quad>(glm::vec3(3.f,-2.f,1.f), glm::vec3(0.f,0.f,4.f), glm::vec3(0.f,4.f,0.f), rightBlue));
+    Add(world, std::make_shared<Quad>(glm::vec3(-2.f,3.f,1.f), glm::vec3(4.f,0.f,0.f), glm::vec3(0.f,0.f,4.f), upperOrange));
+    Add(world, std::make_shared<Quad>(glm::vec3(-2.f,-3.f,5.f), glm::vec3(4.f,0.f,0.f), glm::vec3(0.f,0.f,-4.f), lowerTeal));
+
+    Camera cam;
+    cam.imAspect = 1.0f;
+    cam.imWidth = 400;
+    cam.samplesPerPixel = 100;
+    cam.maxDepth = 50;
+    cam.vfov = 80;
+    cam.pos = glm::vec3(0.0f, 0.0f, 9.0f);
+    cam.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
+    cam.defocusAngle = 0.0f;
+    cam.Render(world);
+}
+
+int world = 3;
 
 int main() {
     // auto ground = std::make_shared<Lambertian>(Color(0.8f, 0.8f, 0.0f));
@@ -128,6 +154,9 @@ int main() {
     }
     else if (world == 2) {
         PerlinSpheres();
+    }
+    else if (world == 3) {
+        Quads();
     }
     return 0;
 }

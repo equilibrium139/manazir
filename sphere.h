@@ -38,12 +38,7 @@ struct Sphere : public Hittable {
         rec.point = ray.origin + rec.t * ray.direction;
         rec.normal = (rec.point - sphereCurrentPos) / radius;
         rec.material = material;
-
-        if (glm::dot(rec.normal, ray.direction) > 0.0f) {
-            rec.normal = -rec.normal;
-            rec.frontFace = false;
-        }
-        else rec.frontFace = true;
+        rec.SetFaceNormal(ray.direction, rec.normal);
 
         rec.uv = GetUV(rec.normal);
 
@@ -56,8 +51,8 @@ struct Sphere : public Hittable {
         glm::vec3 sphereEndPos = movement.PointAt(1.0f);
         const glm::vec3 radiusVec = glm::vec3(radius);
         return {
-            .minCorner = glm::min(sphereStartPos - radiusVec, sphereEndPos - radiusVec),
-            .maxCorner = glm::max(sphereStartPos + radiusVec, sphereEndPos + radiusVec)
+            glm::min(sphereStartPos - radiusVec, sphereEndPos - radiusVec),
+            glm::max(sphereStartPos + radiusVec, sphereEndPos + radiusVec)
         };
     }
 

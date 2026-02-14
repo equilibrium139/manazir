@@ -17,6 +17,15 @@ struct HitRecord {
     float t;
     glm::vec2 uv;
     bool frontFace;
+
+    void SetFaceNormal(const glm::vec3& rayDir, const glm::vec3& normal) {
+        this->normal = normal;
+        if (glm::dot(normal, rayDir) > 0.0f) {
+            this->normal = -this->normal;
+            frontFace = false;
+        }
+        else frontFace = true;
+    }
 };
 
 class Hittable {
@@ -50,7 +59,7 @@ inline bool Hit(const HittableList& list, const Ray& ray, float near, float far,
 }
 
 inline AABB HittableSpanAABB(HittableSpan world) {
-    AABB aabb = { .minCorner = glm::vec3(std::numeric_limits<float>::infinity()), .maxCorner = glm::vec3(-std::numeric_limits<float>::infinity()) };
+    AABB aabb = { glm::vec3(std::numeric_limits<float>::infinity()), glm::vec3(-std::numeric_limits<float>::infinity()) };
     for (const auto& hittable : world) {
         const AABB hittableAABB = hittable->GetAABB();
         aabb.minCorner = glm::min(hittableAABB.minCorner, aabb.minCorner);

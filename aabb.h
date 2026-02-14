@@ -6,6 +6,18 @@
 struct AABB {
     glm::vec3 minCorner, maxCorner;
 
+    AABB(const glm::vec3& a, const glm::vec3& b) {
+        minCorner = glm::min(a, b);
+        maxCorner = glm::max(a, b);
+        PadToMinimums();
+    }
+
+    AABB(const AABB& a, const AABB& b) {
+        minCorner = glm::min(a.minCorner, b.minCorner);
+        maxCorner = glm::max(a.maxCorner, b.maxCorner);
+        PadToMinimums();
+    }
+
     bool Hit(const Ray &ray, const float tMin, const float tMax) const {
         float xDirInverse = 1.0f / ray.direction.x;
         float t0x = (minCorner.x - ray.origin.x) * xDirInverse;
@@ -57,5 +69,23 @@ struct AABB {
             return dims.x > dims.z ? 0 : 2;
         }
         else return dims.y > dims.z ? 1 : 2;
+    }
+
+private:
+    void PadToMinimums() {
+        const float min = 0.0001f;
+        const float delta = min / 2.0f;
+        if (maxCorner.x - minCorner.x < min) {
+            maxCorner.x += delta;
+            minCorner.x -= delta;
+        }
+        if (maxCorner.y - minCorner.y < min) {
+            maxCorner.y += delta;
+            minCorner.y -= delta;
+        }
+        if (maxCorner.z - minCorner.z < min) {
+            maxCorner.z += delta;
+            minCorner.z -= delta;
+        }
     }
 };
